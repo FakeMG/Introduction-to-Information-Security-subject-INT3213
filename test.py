@@ -1,99 +1,79 @@
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import elgamal
-from cryptography.hazmat.primitives import serialization, hashes
-import base64
-import time
 import random
 
+def modular_exponentiation(a, b, m):
+    result = 1  # Khởi tạo giá trị kết quả ban đầu là 1
+    a = a % m  # Tối giản a theo modulo m
 
-## Quá trình tiến hành mã hoá, giải mã, ký và kiểm thử chữ ký trên hệ mật ElGamal
-## với độ dài khoá 1024 bit
+    while b > 0:
+        # Nếu b lẻ, nhân kết quả với a và lấy modulo m
+        if b % 2 == 1:
+            result = (result * a) % m
+        
+        # Bình phương a và lấy modulo m
+        a = (a * a) % m
 
+        # Chia b cho 2
+        b //= 2
 
-# Tạo cặp khóa ElGamal với p có độ dài 1024 bit
-private_key = elgamal.generate_private_key(
-    key_size=1024,
-    backend=default_backend()
-)
+    return result
 
-# Trích xuất khóa công khai và khóa bí mật
-private_pem = private_key.private_bytes(
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PrivateFormat.PKCS8,
-    encryption_algorithm=serialization.NoEncryption()
-)
+def extended_gcd(a, b):
+    if a == 0:
+        return b, 0, 1
+    else:
+        g, x, y = extended_gcd(b % a, a)
+        return g, y - (b // a) * x, x
 
-public_key = private_key.public_key()
+def mod_inverse(a, m):
+    g, x, _ = extended_gcd(a, m)
+    if g != 1:
+        return m + 1
+    else:
+        return x % m
 
-public_pem = public_key.public_bytes(
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PublicFormat.SubjectPublicKeyInfo
-)
+p = 5933
+q = 5441
 
-# Lưu trữ khóa vào file
-with open("elgamal_private_key.pem", "wb") as private_file:
-    private_file.write(private_pem)
+n = p * q
 
-with open("elgamal_public_key.pem", "wb") as public_file:
-    public_file.write(public_pem)
+k = 3
 
-print("Quá trình thiết lập khoá, mã hoá và giải mã bằng hệ mật ElGamal:")
+s1 = 157
+s2 = 43215
+s3 = 4646
 
-time.sleep(2)
+b1 = 1
+b2 = 0
+b3 = 1
 
-# In ra p và g
-p = private_key.private_numbers().public_numbers.parameter_numbers.p
-g = private_key.private_numbers().public_numbers.parameter_numbers.g
+v1 = (-1 ** b1) * mod_inverse(s1**2, n)
+v1 = v1 % n
+v2 = (-1 ** b2) * mod_inverse(s2**2, n)
+v2 = v2 % n
+v3 = (-1 ** b3) * mod_inverse(s3**2, n)
+v3 = v3 % n
 
-print("p:", p)
+r = 1279
+    
+b_r = 1
 
-time.sleep(2)
+x = pow(-1,b_r) * r**2 % n
 
-print("g:", g)
+y = r * s3 % n
 
-time.sleep(2)
+z = y**2 * v3 % n
 
-# Truy cập giá trị x từ khóa bí mật
-x = private_key.private_numbers().x
+print(f"p:{p}")
+print(f"q:{q}")
+print(f"n:{n}")
+print(f"v1:{v1}")
+print(f"v2:{v2}")
+print(f"v3:{v3}")
+print(f"x:{x}")
+print(f"y:{y}")
+print(f"z:{z}")
 
-print("x:", x)
-
-time.sleep(2)
-
-# Truy cập giá trị y từ khóa công khai
-y = public_key.public_numbers().y
-
-print("y:", y)
-
-time.sleep(2)
-
-# Nội dung bản tin
-message = "Chao mung 20 nam thanh lap truong DHCN"
-
-print("Bản tin ban đầu:", message)
-
-# Mã hoá bản tin
-k = random.randint(2, p - 2)
-ciphertext = public_key.encrypt(
-    message.encode('utf-8'),
-    elgamal.ElGamalCiphertext(
-        bytes([random.randint(1, 255) for _ in range(128)]),
-        bytes([random.randint(1, 255) for _ in range(128)])
-    ),
-    k
-)
-
-print("Bản tin đã mã hóa:", base64.b64encode(ciphertext).decode('utf-8'))
-
-time.sleep(2)
-
-# Giải mã bản tin
-plaintext = private_key.decrypt(
-    ciphertext,
-    elgamal.ElGamalCiphertext(
-        bytes([random.randint(1, 255) for _ in range(128)]),
-        bytes([random.randint(1, 255) for _ in range(128)])
-    )
-)
-
-print("Bản tin đã giải mã:", plaintext.decode('utf-8'))
+if z == x or z == x * (-1):
+    print("True")
+else:
+    print("False")
