@@ -11,12 +11,11 @@ for index, letter in enumerate(up_alphabet):
     
 # Hàm quy đổi hệ chữ cái sang hệ thập phân
 def convertUpperName(s:str) -> int:
-    sum = 0
-    
+    total = 0
     for i in range(len(s) - 1, -1, -1):
-        sum += up_alphabet_dict[s[i]] * pow(26, len(s) - 1 - i)    
+        total += up_alphabet_dict[s[i]] * pow(26, len(s) - 1 - i)
 
-    return sum
+    return total
 
 # Hàm tính modulo theo số mũ
 def modular_exponentiation(a, b, m):
@@ -46,10 +45,10 @@ def binary_to_decimal(binary_str):
         return None
 
 
-len = int(input("Mời nhập số chữ số của p:"))
+pLength = int(input("Nhập số chữ số của p:"))
 
 while True:
-    p = random.randint(10**(len - 1), 10**len - 1)
+    p = random.randint(10**(pLength - 1), 10**pLength - 1)
     if sympy.isprime(p):
         break
 
@@ -65,8 +64,8 @@ while not found:
     # Kiểm tra điều kiện 4a^3 + 27b^2 ≠ 0 (mod 79)
     if (4 * (a**3) + 27 * (b**2)) % p != 0:
         
+        # Quadratic Residue
         blList = []
-        
         for i in range(1, int((p + 1) / 2), 1):
             blList.append(modular_exponentiation(i,2,p))
             
@@ -76,15 +75,15 @@ while not found:
         for x in range(p):
             y_squared = (x**3 + a * x + b) % p
             
-            if y_squared in blList:   
+            if y_squared in blList:
+                # Negative and Positive
                 count += 2  # Đếm số điểm, không cần kiểm tra số nguyên tố
 
         # Kiểm tra xem số điểm trên đường cong có phải là số nguyên tố
         if sympy.isprime(count + 1):
             found = True
 
-print(f"Tìm thấy đường cong elliptic:")
-print(f"a = {a}, b = {b}")
+print(f"Tìm thấy đường cong elliptic: a = {a}, b = {b}")
 print(f"Tổng số điểm trên đường cong: {count + 1}")
 
 message = 'HUN'
